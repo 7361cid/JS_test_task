@@ -1,0 +1,47 @@
+.button1 {
+    cursor: pointer;
+    background-image: url('Img2.png');
+    width: 44px;
+    height: 38px
+}
+.button2 {
+    cursor: pointer;
+    background-image: url('Img3.png');
+    width: 44px;
+    height: 38px
+}
+.div {
+    font-size: 20px;
+    word-spacing: 40px;
+}
+
+.div2 {
+    width: 800px;
+    left: 50%;
+    margin-left: 400px;
+}
+
+#p1 {
+    background-color: lightgrey;
+    text-align: left;
+    font-weight:bold;
+    font-size: 20px;
+    width: 400px;
+    height: 30px;
+    word-spacing: 40px;
+    padding: 1px 0;
+
+}
+
+#button_add {
+    background-color: cornflowerblue;
+    font-size: 15px;
+    color: white;
+    font-weight: normal;
+    border-radius: 8px;
+    border: 5px solid;
+
+}
+
+
+
