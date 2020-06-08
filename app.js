@@ -1,63 +1,127 @@
-function add_to_Server(person_data) {
-    console.log("add_to_Server")
-    console.log(person_data)
-    const requestURL ="http://localhost:3000/posts"
-    const xhr2 = new XMLHttpRequest()
-    xhr2.open("POST", requestURL);
-    xhr2.responseType = "json"
-    xhr2.setRequestHeader("Content-type","application/json")
-    xhr2.send (JSON.stringify(person_data))
+/* В данной программе используется локальной хранилище и json сервер для хранения данных
+Cервер запускулся через командную строку среды разработки WebStorm командой json-server -w data.json
+где data.json файл где хранятся данные
+
+ * */
+class Person {
+    constructor(options) {
+        this.first_name = options.first_name
+        this.last_name = options.last_name
+        this.id = options.id
+    }
+
+    addToServer() {
+        const data = {
+            "first_name": this.first_name.toString(),
+            "last_name": this.last_name.toString(),
+            "id": getUniqueID()
+        }
+        console.log(data.id);
+        console.log("add_to_Server")
+        const requestURL = "http://localhost:3000/posts"
+        const xhr = new XMLHttpRequest()
+        xhr.open("POST", requestURL);
+        xhr.responseType = "json"
+        xhr.setRequestHeader("Content-type", "application/json")
+        xhr.send(JSON.stringify(data))
+    }
+
+    addToLocalStorage() {
+        let data = JSON.parse(localStorage.getItem("Persons"))
+        data.push[this]
+        localStorage.setItem("Persons", JSON.stringify(data))
+        console.log(data);
+        this.addToServer()
+    }
+
+    delFromServer() {
+
+        console.log(this.id);
+        console.log("del_from_Server")
+        const requestURL = "http://localhost:3000/posts" + "/" + this.id.toString()
+        console.log(requestURL)
+        const xhr = new XMLHttpRequest()
+        xhr.open("DELETE", requestURL, true)
+        xhr.onload = function () {
+            var users = JSON.parse(xhr.responseText)
+            if (xhr.readyState === 4 && xhr.status === "200") {
+                console.table(users)
+            } else {
+                console.error(users)
+            }
+            xhr.send(null)
+        }
+    }
+
+    changeOnServer() {
+        const data = {
+            "first_name": this.first_name.toString(),
+            "last_name": this.last_name.toString(),
+            "id": this.id
+        }
+            console.log(this.id);
+            const requestURL = "http://localhost:3000/posts"+"/"+this.id.toString()
+            console.log(requestURL);
+            const xhr = new XMLHttpRequest()
+
+            xhr.open("PUT", requestURL, true)
+            xhr.setRequestHeader('Content-type','application/json; charset=utf-8')
+            xhr.onload = function () {
+                var users = JSON.parse(xhr.responseText)
+                if (xhr.readyState === 4 && xhr.status === "200") {
+                    console.table(users)
+                } else {
+                    console.error(users)
+                }
+                xhr.send(JSON.stringify(data))
+            }
+
+
+    }
+}
+function getUniqueID() {
+    let id = localStorage.length
+    let data = JSON.parse(localStorage.getItem("Persons"))
+    for (elem of data)
+    {
+        if (elem.id.toString() === id.toString())
+        {
+            id++
+        }
+    }
+    return id
 }
 
-function change_info_on_Server(id, new_person_data)
+function changeInfo(id)
 {
-    const requestURL ="http://localhost:3000/posts"
-    const xhr2 = new XMLHttpRequest()
-    xhr2.open("PUT", requestURL);
-    xhr2.responseType = "json"
-    xhr2.setRequestHeader("Content-type","application/json")
-    xhr2.send (JSON.stringify(new_person_data))
+    const name = prompt('Введите имя сотрудника?', " ");
+    const name2 = prompt('Введите фамилию сотрудника?', " ");
+    alert('Данные будут изменены')
+    const data_for_change = {
+    "first_name":name,
+        "last_name": "White",
+        "id": id
+    }
+    const person_data = new Person(data_for_change)
+    person_data.changeOnServer()
+    showAll()
 }
 
-function upload_data() {
+function uploadData() {
     const requestURL ="http://localhost:3000/posts"
-    let keys = make_local_storage_keylist()
-    let not_unique_keys = []
     const xhr = new XMLHttpRequest()
     xhr.open('GET',requestURL)
     xhr.responseType = "json"
     xhr.onload =() => {
-        data = xhr.response
-        for (key of keys)   //проход по локальному хранилищу и серверу в поисках уникальных данных
-        {
-            for (let i=0; i<data.length;i++)
-            {
-                if (data[i].id.toString() === key)
-                {
-                    not_unique_keys.push(key)
-                }
-            }
-        }
-        for (key of keys)
-        {
-            if (not_unique_keys.indexOf( key ) === -1)
-            {
-                let person_data = {"first_name": JSON.parse(localStorage.getItem(key)).first_name.toString(),
-                                    "last_name": JSON.parse(localStorage.getItem(key)).last_name.toString(),
-                                    "id": key
-                }
-                add_to_Server(person_data)
-            }
-        }
-
+        const data = xhr.response
+        localStorage.setItem("Persons", JSON.stringify(data))
     }
     xhr.send()
 }
 
-
-function get_data_from_server()
+function getDataFromServer()
 {
-    upload_data()
+    uploadData()
     let data
     const requestURL ="http://localhost:3000/posts"
     const xhr = new XMLHttpRequest()
@@ -65,13 +129,12 @@ function get_data_from_server()
     xhr.responseType = "json"
     xhr.onload =() => {
         data = xhr.response
-        console.log( data.length)
         let html = ''
         for (let i=0; i<data.length;i++)
         {
                 html += `<div class="div">` + data[i].first_name + " " + data[i].last_name
-                html+= `<div class="div2" ><button type="submit" onclick="change_info(` + i.toString() + `)"`
-                html+=  `class="button1"></button><button type="submit" onclick="del_info(` + i.toString() + `)"`
+                html+= `<div class="div2" ><button type="submit" onclick="changeInfo(` + i.toString() + `)"`
+                html+=  `class="button1"></button><button type="submit" onclick="delInfo(` + i.toString() + `)"`
                 html+= `class="button2"></button> </div></div><br>`
         }
         list = document.getElementById('div_server_data')
@@ -81,84 +144,29 @@ function get_data_from_server()
 
 }
 
-function add_to_local_Storage(person_data) {
-    console.log(person_data)
-    let new_key = localStorage.length.toString()
-    let all = make_local_storage_keylist()
-    while (true)
-    {
-        if (all.indexOf( new_key ) === -1 )
-        {
-            console.log(new_key);
-            localStorage.setItem(new_key, JSON.stringify(person_data))
-            add_to_Server(data)
-            show_all()
-            break
-        }
-        else
-        {
-            new_key = parseInt(new_key, 10)
-            new_key++
-            new_key = new_key.toString()
-        }
-    }
-
-}
-
-
-function nameclick(){
+function name_click(){
     const name = prompt('Введите имя сотрудника?', " ");
     const name2 = prompt('Введите фамилию сотрудника?', " ");
-    //const name = document.getElementById("name1")
-    //const name2 = document.getElementById("name2")
-    console.log(name + name2)
-    data = {"first_name":name,
-        "last_name":name2}
-    add_to_local_Storage(data)
-
-
-
-}
-
-console.log(localStorage);
-function change_info(id) {
-    const name = prompt('Введите имя сотрудника?', " ");
-    const name2 = prompt('Введите фамилию сотрудника?', " ");
-    if (name.value === '' || name2.value==='')
-    {
-        alert('Данные не введены')
-        return 0
-    }
-    alert('Данные будут отредактированны')
-    localStorage.removeItem(id.toString())
-    data = {"first_name":name,
-        "last_name":name2}
-    add_to_local_Storage(data)
-    let new_data = {"first_name":name,
+    const data = new Person({"first_name":name,
         "last_name":name2,
-        "id":id.toString()}
-    change_info_on_Server(id, new_data)
+        "id":getUniqueID()
+                        })
+    data.addToLocalStorage()
+    showAll()
 }
 
-function del_info(id) {
+function delInfo(id) { // нужно удалить с сервера, а локальное хранилище обновится данными с сервера
     alert('Данные будут удалены')
-    localStorage.removeItem(id.toString())
-    show_all()
+    const data = JSON.parse(localStorage.getItem("Persons"))
+    const data_for_delete = data[parseInt(id)]
+    const person_data = new Person(data_for_delete)
+    person_data.delFromServer()
+    showAll()
 }
 
-
-function show_all() {
-
-    get_data_from_server()
+function showAll() {
+    uploadData()
+    getDataFromServer()
 }
 
-function make_local_storage_keylist() {
-    keylist = []
-    for (let i=0; i<localStorage.length; i++)
-    {
-        keylist.push(localStorage.key(i))
-    }
-    return keylist
-}
-
-show_all()
+showAll()
